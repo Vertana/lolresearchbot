@@ -62,7 +62,8 @@ build:
     - setup_docker
     - build
   only:
-    - branches
+    - master
+    - dev
 
 .test:
   services:
