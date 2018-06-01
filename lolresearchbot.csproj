@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <LangVersion>7.1</LangVersion>
+    <Configurations>Debug;Release;NET Core</Configurations>
+    <Platforms>AnyCPU</Platforms>
+  </PropertyGroup>
+  <ItemGroup>
+      <None Include="Dockerfile" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+  <PropertyGroup>
+    <NoWarn>NU1701</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="1.0.2" />
+    <PackageReference Include="ini-parser" Version="2.5.2" />
+    <PackageReference Include="microsoft.extensions.configuration" Version="2.1.0-rc1-final" />
+    <PackageReference Include="microsoft.extensions.configuration.fileextensions" Version="2.1.0-rc1-final" />
+    <PackageReference Include="microsoft.extensions.configuration.json" Version="2.1.0-rc1-final" />
+    <PackageReference Include="riotsharp" Version="3.0.1" />
+    <PackageReference Include="System.Drawing.Common" Version="4.5.0-rc1" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.0.0
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lolresearchbot", "lolresearchbot.csproj", "{7E7AC57F-F581-44DA-B72C-A7F61A9AACB8}"
+EndProject
+Global
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7E7AC57F-F581-44DA-B72C-A7F61A9AACB8}.NET Core|Any CPU.ActiveCfg = Release|Any CPU
+		{7E7AC57F-F581-44DA-B72C-A7F61A9AACB8}.NET Core|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		NET Core|Any CPU = NET Core|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+EndGlobal

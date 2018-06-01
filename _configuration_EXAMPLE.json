@@ -1,0 +1,18 @@
+{
+  "tokens": 
+    {
+      "discord": "X",
+      "SMMRY": "X",
+      "LeagueofLegends": "X"
+    },
+    "systemOptions": 
+    {
+      "imageFolder": "/tmp/images",
+      "cacheSize": 500
+    },
+    "LeagueofLegendsOptions": 
+    {
+      "RateLimitPer10S": "X",
+      "RateLimitPer10M": "X"
+    }
+}
