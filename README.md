@@ -1,5 +1,18 @@
 # Readme
 
+
+## Running Without Building
+
+1) Ensure Docker is installed.
+
+2) Change _configuration_EXAMPLE.json to _configuration.json and fill in the values as appropriate.
+
+3) Then run the following command:
+
+```bash
+sudo docker run -v ~/_configuration.json:/data/_configuration.json registry.gitlab.com/vertana/lolresearchbot/master:latest
+```
+
 ## Installation
 
 ### Prerequisites
@@ -27,31 +40,29 @@ dotnet publish lolresearchbot.csproj -c Release -r ubuntu-x64
 
 There are other runtime identifiers if you are building for a different platform other than 64-bit Ubuntu. Please refer to the NET Core documentation for them.
 
-
 After it is built, the bot expects a _configuration.json file with the following layout (replacing X with your appropriate API key for the appropriate service). The configuration file must be placed either in the directory containing the executable or if you're using the Docker deploy method, the file is expected to be placed at /data/_configuration.json.
 Notably the cache size is in MB.
 
 ```JSON
 {
-  "tokens": 
+  "tokens":
     {
       "discord": "X",
       "SMMRY": "X",
       "LeagueofLegends": "X"
     },
-    "systemOptions": 
+    "systemOptions":
     {
       "imageFolder": "/tmp/images",
       "cacheSize": 500
     },
-    "LeagueofLegendsOptions": 
+    "LeagueofLegendsOptions":
     {
       "RateLimitPer10S": "X",
       "RateLimitPer10M": "X"
     }
 }
   ```
-
 
 ## Deploy on Docker
 
