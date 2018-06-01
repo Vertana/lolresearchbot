@@ -1,0 +1,13 @@
+v .0.0.1
+Added basic commands for gathering League of Legends data such as:
+    Basic summoner stats
+    Recent match stats
+    Detailed most recent match info
+
+Added basic general usage commands:
+    Poke users
+    Kick users
+    Ban users
+    
+Logging functionality.
+Docker functionality.
