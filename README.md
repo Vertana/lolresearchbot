@@ -7,7 +7,7 @@
 
 2) Change _configuration_EXAMPLE.json to _configuration.json and fill in the values as appropriate.
 
-3) Then run the following command:
+3) Then run the following command (assuming you placed that config file in your home folder):
 
 ```bash
 sudo docker run -v ~/_configuration.json:/data/_configuration.json registry.gitlab.com/vertana/lolresearchbot/master:latest
