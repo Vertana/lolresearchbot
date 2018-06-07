@@ -49,7 +49,6 @@ namespace LolResearchBot.Services
                     RateLimitPer10M); // This gets an API instance with our API Key and rate limits.
                 staticApi = StaticRiotApi.GetInstance(RiotApiKey, true,
                     cacheTimer); // THis gets a static endpoint API instance with our API key.
-                latestVersion = _fileCache.verIndex.Index[0];
             }
             catch (RiotSharpException ex)
             {
