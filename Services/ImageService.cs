@@ -12,15 +12,23 @@ namespace LolResearchBot.Services
 {
     public class ImageService
     {
-        private const string TEMP_FILE = "tempFile.tmp";
         private readonly IConfigurationRoot _config;
+        private readonly SystemFileService _fileService;
+        private readonly LeagueFileCacheService _fileCache;
 
         public ImageService(
-            IConfigurationRoot config)
+            IConfigurationRoot config,
+            SystemFileService fileService,
+            LeagueFileCacheService fileCache)
         {
             _config = config;
+            _fileService = fileService;
+            _fileCache = fileCache;
+
             if (Directory.Exists(imageFolder))
-                ClearCache(imageFolder);
+                _fileService.ClearCache(imageFolder, cacheSize);
+            else
+             Directory.CreateDirectory(imageFolder);
         }
 
         private string _imageFolder { get; set; }
@@ -31,11 +39,11 @@ namespace LolResearchBot.Services
             {
                 if (File.Exists("/.dockerenv")) // We check if we're running in a Docker container.
                 {
-                    _imageFolder = "/data/images/"; // Yes? Use /data/ mounted volume.
+                    _imageFolder = "/data/league/match_images"; // Yes? Use /data/ mounted volume.
                     return _imageFolder;
                 }
 
-                _imageFolder = _config["systemOptions:imageFolder"];
+                _imageFolder = Path.Combine(_fileCache.leagueCacheFolder, "match_images/");
                 return _imageFolder;
             }
         }
@@ -46,22 +54,36 @@ namespace LolResearchBot.Services
         {
             get
             {
-                _cacheSize = Convert.ToInt32(_config["systemOptions:cacheSize"]);
+                _cacheSize = Convert.ToInt32(_config["systemOptions:imageCacheSize"]);
                 return _cacheSize;
             }
+        }
+
+        public string CheckForImageFile(string fileName)
+        {
+            var file = fileName + ".png";
+            var imageLocation = Path.Combine(imageFolder, file);
+            if ( File.Exists(imageLocation))
+                return imageLocation;
+            else
+                return null;
         }
 
         public string CreateTextImage(string input, string fileName)
         {
             var file = fileName + ".png";
             var imageLocation = Path.Combine(imageFolder, file);
-            if (CheckDirectoryAccess(imageFolder))
+            if (_fileService.CheckDirectoryAccess(imageFolder))
             {
                 if (!File.Exists(imageLocation))
                 {
                     Font font;
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                         font = new Font("Overpass Mono", 18, FontStyle.Regular);
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        font = new Font("Menlo", 18, FontStyle.Regular);
+                    }
                     else
                         font = new Font("Consolas Mono", 18, FontStyle.Regular);
 
@@ -117,76 +139,6 @@ namespace LolResearchBot.Services
             }
 
             return retImg;
-        }
-
-        /// <summary>
-        ///     Checks the ability to create and write to a file in the supplied directory.
-        /// </summary>
-        /// <param name="directory">String representing the directory path to check.</param>
-        /// <returns>True if successful; otherwise false.</returns>
-        private static bool CheckDirectoryAccess(string directory)
-        {
-            var success = false;
-            var fullPath = directory + TEMP_FILE;
-
-            if (Directory.Exists(directory))
-                try
-                {
-                    using (var fs = new FileStream(fullPath, FileMode.CreateNew,
-                        FileAccess.Write))
-                    {
-                        fs.WriteByte(0xff);
-                    }
-
-                    if (File.Exists(fullPath))
-                    {
-                        File.Delete(fullPath);
-                        success = true;
-                        return success;
-                    }
-
-                    return success;
-                }
-                catch (Exception)
-                {
-                    success = false;
-                    return success;
-                }
-
-            Directory.CreateDirectory(directory);
-            CheckDirectoryAccess(directory);
-            return success;
-        }
-
-        //If the cache directory is over the size set in config.json, delete all files that were last accessed more than 2 days ago.
-        private void ClearCache(string imageFolder)
-        {
-            var dirInfo = new DirectoryInfo(imageFolder);
-            var dirSize = DirSize(dirInfo);
-            if (Directory.Exists(imageFolder) && dirSize >= cacheSize)
-            {
-                var files = Directory.GetFiles(imageFolder);
-
-                foreach (var file in files)
-                {
-                    var fi = new FileInfo(file);
-                    if (fi.LastAccessTime < DateTime.Now.AddDays(-2))
-                        fi.Delete();
-                }
-            }
-        }
-
-        private static long DirSize(DirectoryInfo d)
-        {
-            long Size = 0;
-            // Add file sizes.
-            var fis = d.GetFiles();
-            foreach (var fi in fis) Size += fi.Length;
-            // Add subdirectory sizes.
-            var dis = d.GetDirectories();
-            foreach (var di in dis) Size += DirSize(di);
-            //1048576 is 2^20 - this will convert our bytes into MB
-            return Size / 1048576;
         }
     }
 }

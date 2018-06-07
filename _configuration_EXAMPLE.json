@@ -1,18 +1,16 @@
 {
-  "tokens": 
-    {
-      "discord": "X",
-      "SMMRY": "X",
-      "LeagueofLegends": "X"
-    },
-    "systemOptions": 
-    {
-      "imageFolder": "/tmp/images",
-      "cacheSize": 500
-    },
-    "LeagueofLegendsOptions": 
-    {
-      "RateLimitPer10S": "X",
-      "RateLimitPer10M": "X"
-    }
+  "tokens": {
+    "discord": "X",
+    "SMMRY": "X",
+    "LeagueofLegends": "X"
+  },
+  "systemOptions": {
+    "leagueCacheFolder": "/tmp/league/",
+    "imageCacheSize": 500,
+    "leagueCacheSize": 500
+  },
+  "LeagueofLegendsOptions": {
+    "RateLimitPer10S": "X",
+    "RateLimitPer10M": "X"
+  }
 }

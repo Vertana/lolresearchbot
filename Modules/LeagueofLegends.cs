@@ -1,11 +1,15 @@
 using System;
+using System.Drawing;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using LolResearchBot.Model;
 using LolResearchBot.Model.Extensions;
 using LolResearchBot.Services;
+using ProtoBuf;
 using RiotSharp.SummonerEndpoint;
 
 namespace LolResearchBot.Modules
@@ -13,14 +17,117 @@ namespace LolResearchBot.Modules
     // Modules must be public and inherit from an IModuleBase
     public class LeagueofLegendsModule : ModuleBase<SocketCommandContext>
     {
-        public LeagueofLegendsModule(LeagueofLegendsService leagueofLegends, ImageService imageService)
+        public LeagueofLegendsModule(LeagueofLegendsService leagueofLegends, ImageService imageService, LeagueFileCacheService leagueFileCacheService)
         {
             LeagueofLegends = leagueofLegends;
             ImageService = imageService;
+            LeagueFileCacheService = leagueFileCacheService;
         }
 
         private LeagueofLegendsService LeagueofLegends { get; }
         private ImageService ImageService { get; }
+        private LeagueFileCacheService LeagueFileCacheService { get; }
+
+        [Command("versions")]
+        [Alias("version")]
+        [Summary("Checks League of Legends latest version.")]
+        public async Task CheckLeagueVersion()
+        {
+            await ReplyAsync($"The latest version is {LeagueFileCacheService.verIndex.Index[0]}.");
+            await ReplyAsync($"Next up is {LeagueFileCacheService.verIndex.Index[1]}.");
+        }
+
+        [Command("champ")]
+        [Alias("read")]
+        [Summary("Reads League of Legends Champion Cache.")]
+        public async Task SearchChampionCache([Remainder] string champName)
+        {
+            if (champName.All(char.IsDigit))
+            {
+                int id;
+                Int32.TryParse(champName, out id);
+                var returnedDictionary = await Task.Run(() => LeagueFileCacheService.searchCache(id, LeagueFileCacheService.champIndex));
+                LeagueFileCache.Champion champion = (LeagueFileCache.Champion)returnedDictionary;
+
+                if (champion != null)
+                {
+                    var embed = new Discord.EmbedBuilder();
+                    embed.WithTitle(champion.Name);
+                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegends.latestVersion}/img/champion/{champion.Image.Full}");
+                    embed.WithDescription(champion.Lore);
+                    embed.WithFooter($"ID: {champion.Id} | Base HP: {champion.Stats.hp} | Base Armor: {champion.Stats.armor} | Atk: {champion.Info.Attack} | Def: {champion.Info.Defense} | Magic: {champion.Info.Magic} | Difficulty: {champion.Info.Difficulty}");
+                    embed.Build();
+                    await Context.Channel.SendMessageAsync("", false, embed);
+                }
+                else
+                {
+                    await ReplyAsync("Could not find champion info. Are you sure the ID is correct?");
+                }
+            }
+            else
+            {
+                var returnedDictionary = await Task.Run(() => LeagueFileCacheService.searchCache(champName, LeagueFileCacheService.champIndex));
+                LeagueFileCache.Champion champion = (LeagueFileCache.Champion)returnedDictionary;
+                if (champion != null)
+                {
+                    var embed = new Discord.EmbedBuilder();
+                    embed.WithTitle(champion.Name);
+                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegends.latestVersion}/img/champion/{champion.Image.Full}");
+                    embed.WithDescription(champion.Lore);
+                    embed.WithFooter($"ID: {champion.Id} | Base HP: {champion.Stats.hp} | Base Armor: {champion.Stats.armor} | Atk: {champion.Info.Attack} | Def: {champion.Info.Defense} | Magic: {champion.Info.Magic} | Difficulty: {champion.Info.Difficulty}");
+                    embed.Build();
+                    await Context.Channel.SendMessageAsync("", false, embed);
+                }
+                else
+                    await ReplyAsync("Could not find champion info. Is the name spelled correctly?");
+            }
+        }
+
+        [Command("item")]
+        [Alias("it")]
+        [Summary("Reads League of Legends Item Cache.")]
+        public async Task SearchItemCache([Remainder] string itemName)
+        {
+            if (itemName.All(char.IsDigit))
+            {
+                int id;
+                Int32.TryParse(itemName, out id);
+                var returnedDictionary = await Task.Run(() => LeagueFileCacheService.searchCache(id, LeagueFileCacheService.itemIndex));
+                LeagueFileCache.Item item = (LeagueFileCache.Item)returnedDictionary;
+
+                if (item != null)
+                {
+                    var embed = new Discord.EmbedBuilder();
+                    embed.WithTitle(item.Name);
+                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegends.latestVersion}/img/item/{item.Id}.png");
+                    embed.WithDescription(item.sanitizedDescription);
+                    embed.WithFooter($"ID: {item.Id}   Cost: {item.BasePrice}    Selling Price: {item.SellingPrice}");
+                    embed.Build();
+                    await Context.Channel.SendMessageAsync("", false, embed);
+                }
+                else
+                {
+                    await ReplyAsync("Could not find item info. Are you sure the ID is correct?");
+                }
+            }
+            else
+            {
+                var returnedDictionary = await Task.Run(() => LeagueFileCacheService.searchCache(itemName, LeagueFileCacheService.itemIndex));
+                LeagueFileCache.Item item = (LeagueFileCache.Item)returnedDictionary;
+                if (item != null)
+                {
+                    var embed = new Discord.EmbedBuilder();
+                    embed.WithTitle(item.Name);
+                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegends.latestVersion}/img/item/{item.Id}.png");
+                    embed.WithDescription(item.sanitizedDescription);
+                    embed.WithFooter($"ID: {item.Id} | Cost: {item.BasePrice} | Selling Price: {item.SellingPrice}");
+                    embed.Build();
+                    await Context.Channel.SendMessageAsync("", false, embed);
+                }
+                else
+                    await ReplyAsync("Could not find item info. Is the name spelled correctly?");
+            }
+        }
 
         [Command("stats")]
         [Alias("stat")]
@@ -64,15 +171,15 @@ namespace LolResearchBot.Modules
                 foreach (var match in matches.Matches)
                 {
                     counter++;
-                    var champ = await Task.Run(() => LeagueofLegends.GetChampionInfoAsync((int) match.ChampionID))
-                        .ConfigureAwait(false);
+                    var returnedDictionary = await Task.Run(() => LeagueFileCacheService.searchCache((int)match.ChampionID, LeagueFileCacheService.champIndex));
+                    LeagueFileCache.Champion champion = (LeagueFileCache.Champion)returnedDictionary;
                     var matchInfo = await Task.Run(() => LeagueofLegends.GetMatchInfo(match.GameId));
                     var time = matchInfo.GameDuration;
                     var matchDetails = LeagueofLegends.GetMatchInfo(matchInfo.GameId);
                     var result = matchDetails.Result;
                     recentGamesString +=
                         Format.Code(
-                            $"Game: {counter}{Environment.NewLine}Game ID: {match.GameId}{Environment.NewLine}Game Mode: {matchInfo.GameMode}{Environment.NewLine}Lane: {match.Lane.ToString()}{Environment.NewLine}Role: {match.Role}{Environment.NewLine}Season: {FormatSeason(matchInfo.SeasonId)}{Environment.NewLine}Champion: {champ.Name}{Environment.NewLine}Game Length: {ConvertTime(time)}") +
+                            $"Game: {counter}{Environment.NewLine}Game ID: {match.GameId}{Environment.NewLine}Game Mode: {matchInfo.GameMode}{Environment.NewLine}Lane: {match.Lane.ToString()}{Environment.NewLine}Role: {match.Role}{Environment.NewLine}Season: {FormatSeason(matchInfo.SeasonId)}{Environment.NewLine}Champion: {champion.Name}{Environment.NewLine}Game Length: {ConvertTime(time)}") +
                         Environment.NewLine;
                 }
 
@@ -108,9 +215,18 @@ namespace LolResearchBot.Modules
         public async Task GetMatchInfoAsync([Remainder] long gameId)
         {
             var match = await Task.Run(() => LeagueofLegends.GetMatchInfo(gameId));
+
+            var fileName = $"{match.GameId.ToString()}";
+            var imageLocation = ImageService.CheckForImageFile(fileName);
+            if (File.Exists(imageLocation))
+            {
+                await Context.Channel.SendFileAsync(imageLocation).ConfigureAwait(false);
+                return;
+            }
+
             var matchEx = new MatchExtend(match);
-            var header = string.Format("{0,-25} {1,-15} {2,-8} {3,-15} {4,-13} {5,-15} {6,-15}", "Name:",
-                "Highest Tier:", "Lane:", "Role:", "KDA:", "Damage Dealt:", "Damage Taken:");
+            var header = string.Format("{0,-20} {1,-15} {2, -16} {3,-8} {4,-15} {5,-13} {6,-15} {7,-15}", "Name:",
+                "Highest Tier:", "Champ:", "Lane:", "Role:", "KDA:", "Damage Dealt:", "Damage Taken:");
             var playerStrings = new List<string>();
             var titles = new List<string>();
 
@@ -138,10 +254,11 @@ namespace LolResearchBot.Modules
                         var damageDealt = string.Format("{0:n0}", person.Participant.Stats.TotalDamageDealtToChampions);
                         var damageTaken = string.Format("{0:n0}", person.Participant.Stats.TotalDamageTaken);
                         var healed = person.Participant.Stats.TotalHeal;
-                        //var champ = await Task.Run(() => LeagueofLegends.GetChampionInfo((int) person.ChampionId));
+                        var returnedDictionary = await Task.Run(() => LeagueFileCacheService.searchCache(person.Participant.ChampionId, LeagueFileCacheService.champIndex));
+                        LeagueFileCache.Champion champion = (LeagueFileCache.Champion)returnedDictionary;
 
-                        playerStrings.Add(string.Format("{0,-25} {1,-15} {2,-8} {3,-15} {4,-13} {5,-15} {6,-15} {7}",
-                            name, highestTier, lane.ToString(), role.ToString(), assists + "/" + kills + "/" + deaths,
+                        playerStrings.Add(string.Format("{0,-20} {1,-15} {2, -16} {3,-8} {4,-15} {5,-13} {6,-15} {7,-15} {8}",
+                            name, highestTier, champion.Name, lane.ToString(), role.ToString(), assists + "/" + kills + "/" + deaths,
                             damageDealt, damageTaken, Environment.NewLine));
                     }
 
@@ -176,8 +293,8 @@ namespace LolResearchBot.Modules
 
                 try
                 {
-                    var fileName = $"{matchEx.Match.GameId.ToString()}";
-                    var imageLocation = ImageService.CreateTextImage(body, fileName);
+                    fileName = $"{matchEx.Match.GameId.ToString()}";
+                    imageLocation = ImageService.CreateTextImage(body, fileName);
                     await Context.Channel.SendFileAsync(imageLocation);
                 }
                 catch (Exception)
@@ -223,38 +340,40 @@ namespace LolResearchBot.Modules
                 var reasonWeLost = "";
 
                 foreach (var participant in matchEx.Match.ParticipantIdentities)
-                foreach (var person in matchEx.Match.Participants)
-                    if (person.ParticipantId == participant.ParticipantId && participant.Player.AccountId == accountId)
-                    {
-                        var name = participant.Player.SummonerName;
-                        var highestTier = person.HighestAchievedSeasonTier;
-                        var lane = person.Timeline.Lane;
-                        var role = person.Timeline.Role;
-                        var assists = person.Stats.Assists;
-                        var kills = person.Stats.Kills;
-                        var deaths = person.Stats.Deaths;
-                        var damageDealt = person.Stats.TotalDamageDealtToChampions;
-                        var damageTaken = person.Stats.TotalDamageTaken;
-                        var healed = person.Stats.TotalHeal;
-                        var champ = await Task.Run(() => LeagueofLegends.GetChampionInfoAsync(person.ChampionId));
-                        var time = matchEx.Match.GameDuration;
-                        var outcome = person.Stats.Winner;
-                        var champLevel = person.Stats.ChampLevel;
+                    foreach (var person in matchEx.Match.Participants)
+                        if (person.ParticipantId == participant.ParticipantId && participant.Player.AccountId == accountId)
+                        {
+                            var name = participant.Player.SummonerName;
+                            var highestTier = person.HighestAchievedSeasonTier;
+                            var lane = person.Timeline.Lane;
+                            var role = person.Timeline.Role;
+                            var assists = person.Stats.Assists;
+                            var kills = person.Stats.Kills;
+                            var deaths = person.Stats.Deaths;
+                            var damageDealt = person.Stats.TotalDamageDealtToChampions;
+                            var damageTaken = person.Stats.TotalDamageTaken;
+                            var healed = person.Stats.TotalHeal;
+                            var time = matchEx.Match.GameDuration;
+                            var outcome = person.Stats.Winner;
+                            var champLevel = person.Stats.ChampLevel;
 
-                        var playerTeam = matchEx.Teams.First(x => x.Stats.TeamId == person.TeamId);
+                            var returnedDictionary = await Task.Run(() => LeagueFileCacheService.searchCache(person.ChampionId, LeagueFileCacheService.champIndex));
+                            LeagueFileCache.Champion champion = (LeagueFileCache.Champion)returnedDictionary;
 
-                        worstPlayerString =
-                            $"{playerTeam.WorstParticipant.SummonerName} was the worst player on the team.";
+                            var playerTeam = matchEx.Teams.First(x => x.Stats.TeamId == person.TeamId);
 
-                        shamefulString +=
-                            $"Game ID: {matchEx.Match.GameId}{Environment.NewLine}Name: {name}{Environment.NewLine}Game Mode: {matchEx.Match.GameMode}{Environment.NewLine}Lane: {lane}{Environment.NewLine}Role: {role}{Environment.NewLine}Champion: {champ.Name}{Environment.NewLine}Champ Level: {champLevel}{Environment.NewLine}Game Length: {ConvertTime(time)}{Environment.NewLine}KDA: {kills}/{deaths}/{assists}{Environment.NewLine}Highest Rank (at the end of a season): {highestTier}{Environment.NewLine}Damage Dealt: {damageDealt.ToString("N0")}{Environment.NewLine}Damage Taken: {damageTaken.ToString("N0")}";
+                            worstPlayerString =
+                                $"{playerTeam.WorstParticipant.SummonerName} was the worst player on the team with {playerTeam.WorstParticipant.Participant.Stats.Kills}/{playerTeam.WorstParticipant.Participant.Stats.Deaths}/{playerTeam.WorstParticipant.Participant.Stats.Assists}.";
 
-                        //!outcome = the player lost their game
-                        if (damageTaken > damageDealt && !outcome && deaths >= kills + 3 && !role.Contains("SUPPORT"))
-                            reasonWeLost = $"{name} is the reason we lost.";
-                        else if (healed < damageTaken && !outcome && deaths >= kills + 6 && assists <= kills + deaths &&
-                                 role.Contains("SUPPORT")) reasonWeLost = $"{name} is the reason we lost.";
-                    }
+                            shamefulString +=
+                                $"Game ID: {matchEx.Match.GameId}{Environment.NewLine}Name: {name}{Environment.NewLine}Game Mode: {matchEx.Match.GameMode}{Environment.NewLine}Lane: {lane}{Environment.NewLine}Role: {role}{Environment.NewLine}Champion: {champion.Name}{Environment.NewLine}Champ Level: {champLevel}{Environment.NewLine}Game Length: {ConvertTime(time)}{Environment.NewLine}KDA: {kills}/{deaths}/{assists}{Environment.NewLine}Highest Rank (at the end of a season): {highestTier}{Environment.NewLine}Damage Dealt: {damageDealt.ToString("N0")}{Environment.NewLine}Damage Taken: {damageTaken.ToString("N0")}";
+
+                            //!outcome = the player lost their game
+                            if (damageTaken > damageDealt && !outcome && deaths >= kills + 3 && !role.Contains("SUPPORT"))
+                                reasonWeLost = $"{name} is the reason we lost.";
+                            else if (healed < damageTaken && !outcome && deaths >= kills + 6 && assists <= kills + deaths &&
+                                     role.Contains("SUPPORT")) reasonWeLost = $"{name} is the reason we lost.";
+                        }
 
                 await ReplyAsync($"Most recent game:{Environment.NewLine}" + Format.Code(shamefulString) +
                                  Environment.NewLine + reasonWeLost + Environment.NewLine + worstPlayerString);
@@ -269,12 +388,12 @@ namespace LolResearchBot.Modules
         private static string ConvertTime(TimeSpan duration)
         {
             var durationMinutes = duration.TotalMilliseconds / 60;
-            var intPart = (long) durationMinutes;
+            var intPart = (long)durationMinutes;
             var fractionalPart = durationMinutes - intPart;
             var durationSeconds =
                 fractionalPart / 100 * 60 *
                 100; // Converts percentage to raw seconds out of 60. (such as converting 93% to 55 seconds)
-            return $"{((int) durationMinutes).ToString()}:{((int) durationSeconds).ToString("00")}";
+            return $"{((int)durationMinutes).ToString()}:{((int)durationSeconds).ToString("00")}";
         }
 
         // This just converts the season returned (in int form) from LoL API to English.

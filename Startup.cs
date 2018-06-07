@@ -70,6 +70,8 @@ namespace LolResearchBot
                 .AddSingleton<SmmryService>() // Add smmryservice to the collection
                 .AddSingleton<ImageService>() // Add imageservice to the collection
                 .AddSingleton<LeagueofLegendsService>() // Add leagueoflegends to the collection
+                .AddSingleton<SystemFileService>() // Add systemfileservice  to the collection
+                .AddSingleton<LeagueFileCacheService>() // Add leaguefilecacheservice to the collection
                 .AddSingleton<HttpClient>() // Add httpclient to the collection
                 .AddSingleton<Random>() // Add random to the collection
                 .AddSingleton(Configuration); // Add the configuration to the collection

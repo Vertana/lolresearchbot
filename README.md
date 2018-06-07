@@ -1,6 +1,5 @@
 # Readme
 
-
 ## Running Without Building
 
 1) Ensure Docker is installed.
@@ -13,13 +12,19 @@
 sudo docker run -v ~/_configuration.json:/data/_configuration.json registry.gitlab.com/vertana/lolresearchbot/master:latest
 ```
 
+3a) If you'd like to run the development version (no gaurantee of breakage, but I try to not let that happen) run this intead:
+
+```bash
+sudo docker run -v ~/_configuration.json:/data/_configuration.json registry.gitlab.com/vertana/lolresearchbot/dev:latest
+```
+
 ## Installation
 
 ### Prerequisites
 
 This project was built with .NET Core and made to be cross platform. More information on installing this prerequisite can be found [on the Microsoft website](https://www.microsoft.com/net/). You will also require libgdiplus. If you are running Linux, building may require the installation of libunwind8.
 
-Using homebrew on MacOS this can be installed via Homebrew with
+On MacOS this can be installed via Homebrew with
 
 ```bash
 brew update
@@ -53,8 +58,9 @@ Notably the cache size is in MB.
     },
     "systemOptions":
     {
-      "imageFolder": "/tmp/images",
-      "cacheSize": 500
+      "leagueCacheFolder": "/tmp/league/",
+      "imageCacheSize": 500,
+      "leagueCacheSize": 500
     },
     "LeagueofLegendsOptions":
     {
