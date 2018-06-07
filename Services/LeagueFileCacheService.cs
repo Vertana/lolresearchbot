@@ -38,7 +38,7 @@ namespace LolResearchBot.Services
             {
                 if (File.Exists("/.dockerenv")) // We check if we're running in a Docker container.
                 {
-                    _leagueCacheFolder = "/data/league/champs"; // Yes? Use /data/ mounted volume.
+                    _leagueCacheFolder = "/data/league/"; // Yes? Use /data/ mounted volume.
                     return _leagueCacheFolder;
                 }
 

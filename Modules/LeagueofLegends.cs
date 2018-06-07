@@ -33,8 +33,7 @@ namespace LolResearchBot.Modules
         [Summary("Checks League of Legends latest version.")]
         public async Task CheckLeagueVersion()
         {
-            await ReplyAsync($"The latest version is {LeagueFileCacheService.verIndex.Index[0]}.");
-            await ReplyAsync($"Next up is {LeagueFileCacheService.verIndex.Index[1]}.");
+            await ReplyAsync($"The latest League of Legends version is {LeagueFileCacheService.verIndex.Index[0]}.");
         }
 
         [Command("champ")]
