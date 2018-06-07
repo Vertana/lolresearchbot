@@ -13,16 +13,20 @@ namespace LolResearchBot.Services
         private readonly CommandService _commands;
         private readonly IConfigurationRoot _config;
         private readonly DiscordSocketClient _discord;
+         private LeagueofLegendsService LeagueofLegends { get; }
 
         // DiscordSocketClient, CommandService, and IConfigurationRoot are injected automatically from the IServiceProvider
         public StartupService(
             DiscordSocketClient discord,
             CommandService commands,
-            IConfigurationRoot config)
+            IConfigurationRoot config,
+            LeagueofLegendsService leagueofLegends)
         {
             _config = config;
             _discord = discord;
             _commands = commands;
+
+            LeagueofLegends = leagueofLegends;
         }
 
         public async Task StartAsync()
@@ -37,6 +41,10 @@ namespace LolResearchBot.Services
 
             await _commands.AddModulesAsync(Assembly
                 .GetEntryAssembly()); // Load commands and modules into the command service
+
+            await Task.Run(() => LeagueofLegends.CacheAllChampions()).ConfigureAwait(false);//Initialize champion cache at startup
+            await Task.Run(() => LeagueofLegends.CacheAllItems()).ConfigureAwait(false);//Initialize item cache at startup
+            await Task.Run(() => LeagueofLegends.CacheLeagueVersions()).ConfigureAwait(false);//Initialize league version cache at startup
         }
     }
 }

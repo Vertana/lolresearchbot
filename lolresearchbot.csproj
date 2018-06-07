@@ -18,6 +18,7 @@
     <PackageReference Include="microsoft.extensions.configuration" Version="2.1.0-rc1-final" />
     <PackageReference Include="microsoft.extensions.configuration.fileextensions" Version="2.1.0-rc1-final" />
     <PackageReference Include="microsoft.extensions.configuration.json" Version="2.1.0-rc1-final" />
+    <PackageReference Include="protobuf-net" Version="2.3.7" />
     <PackageReference Include="riotsharp" Version="3.0.1" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.0-rc1" />
   </ItemGroup>

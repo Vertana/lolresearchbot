@@ -21,21 +21,26 @@ namespace LolResearchBot.Services
 
         private readonly DiscordSocketClient _discord;
         private readonly LoggingService _logging;
+        private readonly LeagueFileCacheService _fileCache;
         private readonly TimeSpan cacheTimer;
 
         private readonly RiotApi api;
         private readonly StaticRiotApi staticApi;
 
+        public readonly string latestVersion;
+
         public LeagueofLegendsService(
             DiscordSocketClient discord,
             CommandService commands,
             IConfigurationRoot config,
-            LoggingService logging)
+            LoggingService logging,
+            LeagueFileCacheService fileCache)
         {
             _config = config;
             _discord = discord;
             _commands = commands;
             _logging = logging;
+            _fileCache = fileCache;
 
             try
             {
@@ -44,6 +49,7 @@ namespace LolResearchBot.Services
                     RateLimitPer10M); // This gets an API instance with our API Key and rate limits.
                 staticApi = StaticRiotApi.GetInstance(RiotApiKey, true,
                     cacheTimer); // THis gets a static endpoint API instance with our API key.
+                latestVersion = _fileCache.verIndex.Index[0];
             }
             catch (RiotSharpException ex)
             {
@@ -220,6 +226,53 @@ namespace LolResearchBot.Services
                 // Handle the exception however you want.
                 await _logging.OnLogAsync(ex).ConfigureAwait(false);
                 return null;
+            }
+        }
+        public async Task CacheAllChampions()
+        {
+            try
+            {
+                var champs = await Task.Run(() => staticApi.GetChampionsAsync(Region.na, championData: RiotSharp.StaticDataEndpoint.ChampionData.All));
+                var result = _fileCache.CreateChampionCache(champs);
+                return;
+            }
+            catch (RiotSharpException ex)
+            {
+                // Handle the exception however you want.
+                await _logging.OnLogAsync(ex).ConfigureAwait(false);
+                return;
+            }
+        }
+
+        public async Task CacheAllItems()
+        {
+            try
+            {
+                var items = await Task.Run(() => staticApi.GetItemsAsync(Region.na, itemData: RiotSharp.StaticDataEndpoint.ItemData.All));
+                var result = _fileCache.CreateItemCache(items);
+                return;
+            }
+            catch (RiotSharpException ex)
+            {
+                // Handle the exception however you want.
+                await _logging.OnLogAsync(ex).ConfigureAwait(false);
+                return;
+            }
+        }
+
+        public async Task CacheLeagueVersions()
+        {
+            try
+            {
+                var versionList =  await Task.Run(() => staticApi.GetVersionsAsync(Region.na));
+                await _fileCache.CreateVersionCache(versionList);
+                return;
+            }
+            catch (RiotSharpException ex)
+            {
+                // Handle the exception however you want.
+                await _logging.OnLogAsync(ex).ConfigureAwait(false);
+                return;
             }
         }
     }
