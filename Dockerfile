@@ -1,7 +1,6 @@
 FROM microsoft/dotnet AS base
 ENV DOTNET_SKIP_FIRST_TIME_EXPERIENCE true
 WORKDIR /app
-EXPOSE 5000
 
 
 # install libgdiplus for System.Drawing, wget for downloading font, unzip to unzip font, as well as, libunwind.
