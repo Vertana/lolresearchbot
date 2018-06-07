@@ -273,6 +273,7 @@ namespace LolResearchBot.Services
             }
 
             verIndex.Index = Serializer.DeepClone(verDict);
+            LeagueofLegendsService.latestVersion = verDict[0];
             var fileName = Path.Combine(leagueCacheFolder, "versions.cache");
             using (var file = File.Create(fileName))
             {

@@ -52,7 +52,7 @@ namespace LolResearchBot.Modules
                 {
                     var embed = new Discord.EmbedBuilder();
                     embed.WithTitle(champion.Name);
-                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegends.latestVersion}/img/champion/{champion.Image.Full}");
+                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegendsService.latestVersion}/img/champion/{champion.Image.Full}");
                     embed.WithDescription(champion.Lore);
                     embed.WithFooter($"ID: {champion.Id} | Base HP: {champion.Stats.hp} | Base Armor: {champion.Stats.armor} | Atk: {champion.Info.Attack} | Def: {champion.Info.Defense} | Magic: {champion.Info.Magic} | Difficulty: {champion.Info.Difficulty}");
                     embed.Build();
@@ -71,7 +71,7 @@ namespace LolResearchBot.Modules
                 {
                     var embed = new Discord.EmbedBuilder();
                     embed.WithTitle(champion.Name);
-                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegends.latestVersion}/img/champion/{champion.Image.Full}");
+                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegendsService.latestVersion}/img/champion/{champion.Image.Full}");
                     embed.WithDescription(champion.Lore);
                     embed.WithFooter($"ID: {champion.Id} | Base HP: {champion.Stats.hp} | Base Armor: {champion.Stats.armor} | Atk: {champion.Info.Attack} | Def: {champion.Info.Defense} | Magic: {champion.Info.Magic} | Difficulty: {champion.Info.Difficulty}");
                     embed.Build();
@@ -98,7 +98,7 @@ namespace LolResearchBot.Modules
                 {
                     var embed = new Discord.EmbedBuilder();
                     embed.WithTitle(item.Name);
-                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegends.latestVersion}/img/item/{item.Id}.png");
+                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegendsService.latestVersion}/img/item/{item.Id}.png");
                     embed.WithDescription(item.sanitizedDescription);
                     embed.WithFooter($"ID: {item.Id}   Cost: {item.BasePrice}    Selling Price: {item.SellingPrice}");
                     embed.Build();
@@ -117,7 +117,7 @@ namespace LolResearchBot.Modules
                 {
                     var embed = new Discord.EmbedBuilder();
                     embed.WithTitle(item.Name);
-                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegends.latestVersion}/img/item/{item.Id}.png");
+                    embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegendsService.latestVersion}/img/item/{item.Id}.png");
                     embed.WithDescription(item.sanitizedDescription);
                     embed.WithFooter($"ID: {item.Id} | Cost: {item.BasePrice} | Selling Price: {item.SellingPrice}");
                     embed.Build();

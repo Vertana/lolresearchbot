@@ -27,7 +27,7 @@ namespace LolResearchBot.Services
         private readonly RiotApi api;
         private readonly StaticRiotApi staticApi;
 
-        public readonly string latestVersion;
+        public static string latestVersion;
 
         public LeagueofLegendsService(
             DiscordSocketClient discord,
