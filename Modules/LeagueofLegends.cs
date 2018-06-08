@@ -149,7 +149,7 @@ namespace LolResearchBot.Modules
                     embed.WithTitle(item.Name);
                     embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegendsService.latestVersion}/img/item/{item.Id}.png");
                     embed.WithDescription(item.sanitizedDescription);
-                    embed.WithFooter($"ID: {item.Id}   Cost: {item.BasePrice}    Selling Price: {item.SellingPrice}");
+                    embed.WithFooter($"ID: {item.Id} | Total Price: {item.TotalPrice} | Upgrade Cost: {item.BasePrice} | Selling Price: {item.SellingPrice}");
                     embed.Build();
                     await Context.Channel.SendMessageAsync("", false, embed);
                 }
@@ -168,7 +168,7 @@ namespace LolResearchBot.Modules
                     embed.WithTitle(item.Name);
                     embed.WithThumbnailUrl($"https://ddragon.leagueoflegends.com/cdn/{LeagueofLegendsService.latestVersion}/img/item/{item.Id}.png");
                     embed.WithDescription(item.sanitizedDescription);
-                    embed.WithFooter($"ID: {item.Id} | Cost: {item.BasePrice} | Selling Price: {item.SellingPrice}");
+                    embed.WithFooter($"ID: {item.Id} | Total Price: {item.TotalPrice} | Upgrade Cost: {item.BasePrice} | Selling Price: {item.SellingPrice}");
                     embed.Build();
                     await Context.Channel.SendMessageAsync("", false, embed);
                 }
