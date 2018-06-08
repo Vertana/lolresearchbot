@@ -14,6 +14,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="1.0.2" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.8.4" />
     <PackageReference Include="ini-parser" Version="2.5.2" />
     <PackageReference Include="microsoft.extensions.configuration" Version="2.1.0-rc1-final" />
     <PackageReference Include="microsoft.extensions.configuration.fileextensions" Version="2.1.0-rc1-final" />

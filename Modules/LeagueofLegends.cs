@@ -3,9 +3,12 @@ using System.Drawing;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using HtmlAgilityPack;
 using LolResearchBot.Model;
 using LolResearchBot.Model.Extensions;
 using LolResearchBot.Services;
@@ -17,24 +20,70 @@ namespace LolResearchBot.Modules
     // Modules must be public and inherit from an IModuleBase
     public class LeagueofLegendsModule : ModuleBase<SocketCommandContext>
     {
-        public LeagueofLegendsModule(LeagueofLegendsService leagueofLegends, ImageService imageService, LeagueFileCacheService leagueFileCacheService)
+        public LeagueofLegendsModule(LeagueofLegendsService leagueofLegends, ImageService imageService, LeagueFileCacheService leagueFileCacheService, SmmryService smmryService)
         {
             LeagueofLegends = leagueofLegends;
             ImageService = imageService;
             LeagueFileCacheService = leagueFileCacheService;
+            SmmryService = smmryService;
         }
 
         private LeagueofLegendsService LeagueofLegends { get; }
         private ImageService ImageService { get; }
         private LeagueFileCacheService LeagueFileCacheService { get; }
+        private SmmryService SmmryService { get; }
 
         [Command("versions")]
         [Alias("version")]
         [Summary("Checks League of Legends latest version.")]
         public async Task CheckLeagueVersion()
         {
-            await ReplyAsync($"The latest League of Legends version is {LeagueFileCacheService.verIndex.Index[0]}.");
+            if (LeagueofLegendsService.latestVersion == "" || LeagueofLegendsService.latestVersion == null)
+            {
+                LeagueofLegendsService.latestVersion = LeagueFileCacheService.verIndex.Index[0];
+            }
+            var strippedVersion = LeagueofLegendsService.latestVersion.Split('.')[0] + LeagueofLegendsService.latestVersion.Split('.')[1];
+            var patchNoteURL = $"http://na.leagueoflegends.com/en/news/game-updates/patch/patch-{strippedVersion}-notes";
+
+            var embed = new Discord.EmbedBuilder();
+            embed.WithTitle($"Latest Version of LoL: {LeagueofLegendsService.latestVersion}");
+            embed.WithUrl($"{patchNoteURL}");
+            embed.WithThumbnailUrl($"https://na.leagueoflegends.com/sites/default/files/styles/wide_medium/public/upload/patch{strippedVersion}headerimage.jpg");
+            embed.WithDescription(ReadTextFromUrl(patchNoteURL)[0]);
+            embed.Build();
+            await Context.Channel.SendMessageAsync("", false, embed);
         }
+
+        private List<string> ReadTextFromUrl(string url)
+        {
+            // WebClient is still convenient
+            // Assume UTF8, but detect BOM - could also honor response charset I suppose
+            using (var client = new WebClient())
+            {
+                client.Headers.Add("User-Agent: Other");
+                using (var stream = client.OpenRead(url))
+                using (var textReader = new StreamReader(stream, Encoding.UTF8, true))
+                {
+                    return GetBlockQuoteListFromHtml(textReader.ReadToEnd());
+                }
+            }
+        }
+
+        public List<string> GetBlockQuoteListFromHtml(string sourceHtml)
+        {
+
+            var bQuotes = new List<string>();
+            HtmlDocument doc = new HtmlDocument();//first create an HtmlDocument
+            doc.LoadHtml(sourceHtml);//load the html (from a string)
+            HtmlNodeCollection blockquotes = doc.DocumentNode.SelectNodes(".//blockquote");//Select all the <blockquote> nodes in a HtmlNodeCollection
+
+            foreach (HtmlNode blockquote in blockquotes)
+            {
+                bQuotes.Add(blockquote.InnerText);//Add the InnerText to the list (actual content we're after)
+            }
+            return bQuotes;
+        }
+
 
         [Command("champ")]
         [Alias("read")]
