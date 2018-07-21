@@ -43,7 +43,7 @@ namespace LolResearchBot.Modules
                 LeagueofLegendsService.latestVersion = LeagueFileCacheService.verIndex.Index[0];
             }
             var strippedVersion = LeagueofLegendsService.latestVersion.Split('.')[0] + LeagueofLegendsService.latestVersion.Split('.')[1];
-            var patchNoteURL = $"http://na.leagueoflegends.com/en/news/game-updates/patch/patch-{strippedVersion}-notes";
+            var patchNoteURL = $"https://na.leagueoflegends.com/en/news/game-updates/patch/patch-{strippedVersion}-notes";
 
             var embed = new Discord.EmbedBuilder();
             embed.WithTitle($"Latest Version of LoL: {LeagueofLegendsService.latestVersion}");
