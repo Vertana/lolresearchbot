@@ -36,21 +36,14 @@ namespace LolResearchBot.Services
             // This value holds the offset where the prefix ends
             var argPos = 0;
 
-            //await message.ModifyAsync(m => { m.Content = Regex.Replace(message.Content, @"\s+", " "); });
-            if (message.HasMentionPrefix(_discord.CurrentUser, ref argPos) || IsPrivateMessage(message))
+            if (message.HasMentionPrefix(_discord.CurrentUser, ref argPos) || IsPrivateMessage(message) || message.HasCharPrefix('!', ref argPos))
             {
+                
                 var context = new SocketCommandContext(_discord, message);
+                var cleanCommand = context.Message.Content.Substring(argPos).Trim();
                 using (context.Channel.EnterTypingState())
                 {
-                    var result = await _commands.ExecuteAsync(context, argPos, _services);
-
-                    //log test line
-                    // if (message.Source.ToString() == "User")
-                    // {
-                    //     LogMessage lol = new LogMessage(Discord.LogSeverity.Info, message.Source.ToString(), message.Content);
-                    //     LoggingService log = new LoggingService(_discord, _commands);
-                    //     await log.OnLogAsync(lol);
-                    // }
+                    var result = await _commands.ExecuteAsync(context, cleanCommand, _services);
 
                     if (result.Error.HasValue && result.Error.Value != CommandError.UnknownCommand
                     ) // it's bad practice to send 'unknown command' errors
