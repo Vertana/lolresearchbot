@@ -1,5 +1,5 @@
 # Readme
-
+This program costs $100 dollars
 
 ## Running Without Building
 
